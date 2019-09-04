@@ -165,7 +165,7 @@ https://s3.console.aws.amazon.com/s3/buckets/us-west-2.serverless-analytics/NYC-
 ````
 https://s3.console.aws.amazon.com/s3/object/us-west-2.serverless-analytics/NYC-Pub/green/green_tripdata_2013-08.csv?region=us-west-2&tab=select
 ````
-![](../images/green_preview.png)
+![](/assets/images/green_preview.png)
 	
 	
 ### Build your DDL 
