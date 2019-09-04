@@ -142,7 +142,7 @@ In this lab, we show you how to query petabytes of data with Amazon Redshift and
 ## Before You Begin
 
 This lab requires a new Redshift cluster in **US-WEST-2 (Oregon)**, use the following link to <br>
-[![Launch](/assets/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ImmersionRedshift&templateURL=https://s3-us-west-2.amazonaws.com/immersionday-lab/data-engineering/create_redshift_CFN.yaml)
+[![Launch](/assets/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ImmersionRedshift&templateURL=https://immersionday-lab.s3.amazonaws.com/data-engineering/Create_Redshift_CFN.yaml)
 
 And gather the following information
 * [Your-Redshift_Hostname]
