@@ -144,12 +144,13 @@ In this lab, we show you how to query petabytes of data with Amazon Redshift and
 This lab requires a new Redshift cluster in **US-WEST-2 (Oregon)**, use the following link to <br>
 [![Launch](/assets/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ImmersionRedshift&templateURL=https://immersionday-lab.s3.amazonaws.com/data-engineering/Create_Redshift_CFN.yaml)
 
-And gather the following information
+And gather the following information from the stack output above:
 * [Your-Redshift_Hostname]
 * [Your-Redshift_Port]
 * [Your-Redshift_Username]
 * [Your-Redshift_Password]
 * [Your-Redshift_Role_ARN]
+![](/assets/images/cf_output_rs.png)
 
 ## What Happened in 2016
 In the first part of this lab, we will perform the following activities:
@@ -217,7 +218,7 @@ SORTKEY (passenger_count,pickup_datetime);
 ```python
 COPY workshop_das.green_201601_csv
 FROM 's3://us-west-2.serverless-analytics/NYC-Pub/green/green_tripdata_2016-01.csv'
-IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]'
+IAM_ROLE '[Your-Redshift_Role_ARN]'
 DATEFORMAT 'auto'
 IGNOREHEADER 1
 DELIMITER ','
@@ -240,7 +241,7 @@ select count(1) from workshop_das.green_201601_csv;
 </p>
 </details>
 
-**HINT: The `[Your-Redshift_Role]` and `[Your-AWS-Account_Id]` in the above command should be replaced with the values determined at the beginning of the lab.**
+**HINT: The `[Your-Redshift_Role_ARN]` in the above command should be replaced by the CloudFormation output value at the beginning of the lab.**
 
 ### Pin-point the Blizzard 
 In this month, there is a date which had the lowest number of taxi rides due to a blizzard. Can you find that date?
@@ -318,7 +319,7 @@ Because external tables are stored in a shared Glue Catalog for use within the A
 ```python
 CREATE external SCHEMA adb305
 FROM data catalog DATABASE 'spectrumdb' 
-IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]'
+IAM_ROLE '[Your-Redshift_Role_ARN]'
 CREATE external DATABASE if not exists;
 ```
 
@@ -655,21 +656,21 @@ CREATE TABLE workshop_das.taxi_loader AS
 * The population could be scripted easily; there are also a few different patterns that could be followed.  Below is a script which issues a seperate copy command for each partition where the **type=green**.  Once complete, seperate scripts would need to be used for other **type** partitions.
 
 ````
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=10/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=11/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=12/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=1/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=2/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=3/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=4/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=5/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=6/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=7/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=8/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=9/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=10/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=11/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
-COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=12/type=green' IAM_ROLE 'arn:aws:iam::[Your-AWS-Account_Id]:role/[Your-Redshift_Role]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=10/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=11/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2015/month=12/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=1/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=2/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=3/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=4/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=5/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=6/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=7/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=8/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=9/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=10/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=11/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
+COPY workshop_das.taxi_loader FROM 's3://us-west-2.serverless-analytics/canonical/NY-Pub/year=2016/month=12/type=green' IAM_ROLE '[Your-Redshift_Role_ARN]' FORMAT AS PARQUET;
 ````
 
 ````

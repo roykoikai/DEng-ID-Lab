@@ -189,12 +189,14 @@ Resources:
         Ref: PublicRouteTable
 Outputs:
   ClusterEndpoint:
-    Description: Cluster endpoint
+    Description: Redshift Hostname and Port
     Value: !Sub "${RedshiftCluster.Endpoint.Address}:${RedshiftCluster.Endpoint.Port}"
   RedshiftRoleARN:
-    Description: Name of IAM Role
+    Description: Redshift Role ARN Number
     Value: !GetAtt RedshiftRole.Arn
   MasterUsername:
+    Description: Redshift Username
     Value: !Ref MasterUsername
   MasterUserPassword:
+    Description: Redshift Password
     Value: !Ref MasterUserPassword
