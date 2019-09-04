@@ -272,15 +272,15 @@ In the next part of this lab, we will perform the following activities:
 ````
 https://s3.console.aws.amazon.com/s3/buckets/serverless-analytics/canonical/NY-Pub/?region=us-west-2&tab=overview
 ````
-![](../images/canonical_year.png)
+![](/assets/images/canonical_year.png)
 ````
 https://s3.console.aws.amazon.com/s3/buckets/serverless-analytics/canonical/NY-Pub/year%253D2016/month%253D1/?region=us-east-1&tab=overview
 ````
-![](../images/canonical_month.png)
+![](/assets/images/canonical_month.png)
 ````
 https://s3.console.aws.amazon.com/s3/buckets/serverless-analytics/canonical/NY-Pub/year%253D2016/month%253D1/type%253Dgreen/?region=us-east-1&tab=overview
 ````
-![](../images/canonical_type.png)
+![](/assets/images/canonical_type.png)
 
 
 ### Create external schema (and DB) for Redshift Spectrum
@@ -289,25 +289,25 @@ Because external tables are stored in a shared Glue Catalog for use within the A
 * Use the AWS Glue Crawler to create your external table adb305.ny_pub stored in parquet format under location s3://us-west-2.serverless-analytics/canonical/NY-Pub/.
 
 	1. Navigate to the **Glue Crawler Page**. https://console.aws.amazon.com/glue/home?#catalog:tab=crawlers
-	![](../images/crawler_0.png)
+	![](/assets/images/crawler_0.png)
 	1. Click on *Add Crawler*, and enter the crawler name *NYTaxiCrawler* and click *Next*.
-	![](../images/crawler_1.png)
+	![](/assets/images/crawler_1.png)
 	1. Select *Data stores* as the source type and click *Next*.
-	![](../images/crawler_2.png)
+	![](/assets/images/crawler_2.png)
 	1. Choose *S3* as the data store and the include path of *s3://us-west-2.serverless-analytics/canonical/NY-Pub*
-	![](../images/crawler_3.png)
+	![](/assets/images/crawler_3.png)
 	1. *Create an IAM Role* and enter the name AWSGlueServiceRole-*RedshiftImmersion*.  
-	![](../images/crawler_4.png)
+	![](/assets/images/crawler_4.png)
 	1. Select *Run on demand* for the frequency.
-	![](../images/crawler_5.png)
+	![](/assets/images/crawler_5.png)
 	1. Click on *Add database* and enter the Database of *spectrumdb*
-	![](../images/crawler_6.png)
+	![](/assets/images/crawler_6.png)
 	1. Select all remaining defaults. Once the Crawler has been created, click on *Run Crawler*.
-	![](../images/crawler_7.png)
+	![](/assets/images/crawler_7.png)
 	1. Once the Crawler has completed its run, you will see a new table in the Glue Catalog. https://console.aws.amazon.com/glue/home?#catalog:tab=tables
-	![](../images/crawler_8.png)
+	![](/assets/images/crawler_8.png)
 	1. Click on the *ny_pub* table, notice the recordCount of 2.87 billion. 
-	![](../images/crawler_9.png)
+	![](/assets/images/crawler_9.png)
 
 
 * Now that the table has been cataloged, switch back to your Redshift query editor and create an external schema **adb305** pointing to your Glue Catalog Database **spectrumdb**
