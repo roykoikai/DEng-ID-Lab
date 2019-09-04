@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Master template for Serverless Data Lake Immersion Day
+
+# Note - The EEModuleVersion can't be $LATEST or $DEFAULT. Your module version should be a number.
+# if running this manually in Isengard, you can specify arbitrary values
+# for all of the parameters *except* the module Id and version which are needed
+# to pull assets properly from S3, *and* you should leave the SNS topic blank
+# so that, based on Conditions in this template, CloudFormation will avoid
+# subscribing resources to a non-existent SNS topic.
+
+Parameters:  
+  EEAPIBase:  
+    Description: "The Event Engine API Base URL in the form https://hostname:port/api"  
+    Type: String  
+  EEAPIToken:  
+    Description: "The API Token that the module uses for authentication"  
+    Type: String  
+  EEEventId:  
+    Description: "ID of the specific Event"  
+    Type: String  
+  EELifecycleTopicArn:  
+    Description: "ARN of the Event Engine Module lifecycle SNS topic"  
+    Type: String
+  EEModuleId:
+    Description: "Your module ID"  
+    Type: String 
+  EEModuleVersion:  
+    Description: "Your Module Version"
+    Type: String 
+  EEAssetsBucket:
+    Description: "Artifacts Bucket"
+    Type: String  
+
+Conditions: 
+  # Used to optionally exclude the subscription of Lambda functions (or other
+  # resources) to the lifecycle SNS topic if its not provided in the template
+  # to avoid deployment errors. This is specifically aimed at making it easier
+  # to deploy your template in Isengard (outside of EE) for test/debug. 
+  LifecycleTopicIsNotEmpty:
+    Fn::Not: 
+      - !Equals [!Ref EELifecycleTopicArn, ""]
+
+Resources: 
+  #------------------------------------------------------------------------------#
+  # FUNCTION TO HANDLE EVENT LIFECYCLE EVENTS RECEIVED ON SNS TOPIC
+  #------------------------------------------------------------------------------#  
+  HandleMasterLifecycleEventsFunction:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: 
+        S3Bucket: !Ref EEAssetsBucket
+        S3Key: !Sub "modules/${EEModuleId}/v${EEModuleVersion}/lambda/handle-master-lifecycle-events.zip"
+      Description: Function receives lifecycle events from event engine and handles them as needed. 
+      Environment: 
+        Variables: 
+          API_BASE: !Ref EEAPIBase
+          API_TOKEN: !Ref EEAPIToken
+          EVENT_REGION: !Ref AWS::Region
+          EVENT_ID: !Ref EEEventId
+          MODULE_ID: !Ref EEModuleId
+          SEND_TEAM_OUTPUT_TO_EVENT_ENGINE_FUNCTION: !Ref SendTeamOutputToEventEngineFunction
+      Handler: index.handler
+      Role: !GetAtt HandleMasterLifecycleEventsRole.Arn
+      Runtime: python3.7
+
+  HandleMasterLifecycleEventsSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: LifecycleTopicIsNotEmpty
+    Properties: 
+      Endpoint: !GetAtt HandleMasterLifecycleEventsFunction.Arn 
+      Protocol: lambda
+      TopicArn: !Ref EELifecycleTopicArn
+
+  HandleMasterLifecycleEventsPermissionForSns:
+    Type: AWS::Lambda::Permission
+    Condition: LifecycleTopicIsNotEmpty
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref EELifecycleTopicArn
+      FunctionName: !Ref HandleMasterLifecycleEventsFunction
+
+  HandleMasterLifecycleEventsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - lambda:invokeFunction
+            Resource: arn:aws:lambda:*:*:*
+
+  #------------------------------------------------------------------------------#
+  # FUNCTION TO SEND OUTPUTS TO EVENT ENGINE VIA AN API CALL
+  #------------------------------------------------------------------------------#  
+  SendTeamOutputToEventEngineFunction:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: 
+        S3Bucket: !Ref EEAssetsBucket
+        S3Key: !Sub "modules/${EEModuleId}/v${EEModuleVersion}/lambda/send-team-output-to-event-engine.zip"
+      Description: Sends team outputs to Event Engine.
+      Environment: 
+        Variables: 
+          API_BASE: !Ref EEAPIBase
+          API_TOKEN: !Ref EEAPIToken
+          EVENT_REGION: !Ref AWS::Region
+          EVENT_ID: !Ref EEEventId
+          MODULE_ID: !Ref EEModuleId
+      Handler: index.handler
+      Role: !GetAtt SendOutputToEventEngineRole.Arn
+      Runtime: python3.7
+
+  SendOutputToEventEngineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
