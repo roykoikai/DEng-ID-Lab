@@ -200,3 +200,6 @@ Outputs:
   MasterUserPassword:
     Description: Redshift Password
     Value: !Ref MasterUserPassword
+  RedshiftDatabaseName:
+    Description: Redshift Database Name
+    Value: !Ref DatabaseName  
